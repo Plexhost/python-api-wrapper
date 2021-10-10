@@ -1,0 +1,1 @@
+BASE_URL="https://dashboard.plexhost.dk/api/client/"
