@@ -20,6 +20,9 @@ class InvalidArgument(ClientException):
     """
     pass
 
+class MissingArgument(ClientException):
+    """Exception thrown when an argument is missing."""
+    pass
 
 class BadRequest(ClientException):
     """Exception thrown when the user makes a bad request"""

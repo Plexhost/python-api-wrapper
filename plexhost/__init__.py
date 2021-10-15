@@ -16,3 +16,5 @@ __copyright__ = 'Copyright 2021 PlexHost'
 __version__ = '0.0.1'
 
 from .client import PlexHostClient  # noqa
+from .api.Subuser import Subuser
+from .api.Server import Server

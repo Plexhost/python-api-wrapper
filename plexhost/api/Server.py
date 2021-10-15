@@ -1,6 +1,7 @@
-import requests
+from typing import List
 
-from plexhost.errors import BadRequest
+from plexhost.api.Subuser import Subuser
+from plexhost.errors import BadRequest, Forbidden, MissingArgument
 
 
 class Server():
@@ -79,6 +80,7 @@ class Server():
         self._client._request(endpoint='servers/%s/command' % self.get_id(), method='POST', data={'command': command},
                               json=False)
 
+    """ Power Endpoints """
     def start(self):
         """Start the server"""
         self._power_action("start")
@@ -95,14 +97,6 @@ class Server():
         """Kill the server"""
         self._power_action("kill")
 
-    def get_users(self):
-        return self.get_subusers()
-
-    def get_subusers(self):
-        """List[Dict]: Lists dicts over the servers subusers"""
-        response = self._client._parse_response(self._client._request(endpoint='servers/%s/users' % self.get_id()))
-        return response
-
     def _power_action(self, action: str = "start"):
         """Sends a action to the server (power)
 
@@ -117,6 +111,7 @@ class Server():
         self._client._request(endpoint='servers/%s/power' % self.get_id(), method='POST', data={'signal': action},
                               json=False)
 
+    """ File Endpoints """
     def list_files(self, path: str = None):
         """List files on the server
 
@@ -128,3 +123,73 @@ class Server():
         response = self._client._parse_response(
             self._client._request(endpoint='servers/%s/files/list' % self.get_id(), params=params))
         return response
+
+    """ Users Endpoints """
+    def get_users(self):
+        return self.get_subusers()
+
+    def get_subusers(self):
+        """List[:class:`Subuser`]: Lists dicts over the servers subusers"""
+        users = []
+        response = self._client._parse_response(self._client._request(endpoint='servers/%s/users' % self.get_id()))
+        for user in response:
+            users.append(Subuser(user))
+            print(user)
+        return users
+
+    def create_user(self, email: str, permissions: List[str]):
+        """ Create a new subuser to the server
+
+
+        :param email: The email which will be added to the server.
+        :param permission: List[str] of permissions. Options:
+             "control.console"
+             "control.start"
+             "control.stop"
+             "control.restart"
+             "user.create"
+             "user.read"
+             "user.update"
+             "user.delete"
+             "file.create"
+             "file.read"
+             "file.read-content"
+             "file.update"
+             "file.delete"
+             "file.archive"
+             "file.sftp"
+             "backup.create"
+             "backup.read"
+             "backup.delete"
+             "backup.download"
+             "backup.restore"
+             "allocation.read"
+             "allocation.create"
+             "allocation.update"
+             "allocation.delete"
+             "startup.read"
+             "startup.update"
+             "startup.docker-image"
+             "database.create"
+             "database.read"
+             "database.update"
+             "database.delete"
+             "database.view_password"
+             "schedule.create"
+             "schedule.read"
+             "schedule.update"
+             "schedule.delete"
+             "settings.rename"
+             "settings.reinstall"
+             "websocket.connect"
+        :return: :class:`Subuser`
+        """
+        if not(self.is_owner()):
+            raise Forbidden("Only the server owner can create subusers.")
+
+        data = {
+            "email": email,
+            "permissions": permissions
+        }
+        response = self._client._parse_response(self._client._request(endpoint='servers/%s/users' % self.get_id(), method='POST', data=data, json=False))
+        return Subuser(response)
