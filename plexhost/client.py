@@ -1,7 +1,8 @@
-from .api.Base import PlexHostAPI
+from .api import Base
+from .api.Server import Server
 
 
-class PlexHostClient(PlexHostAPI):
+class PlexHostClient(Base.PlexHostAPI):
     """
     Represents a client connected to the dashboard.
 
@@ -14,4 +15,13 @@ class PlexHostClient(PlexHostAPI):
 
     def get_servers(self):
         """List[:class:`Server`]: The servers which the user has access to"""
-        print(self._request(""))
+        servers = []
+        response = self._parse_response(self._request(''))
+        for server in response:
+            servers.append(Server(props=server, client=self))
+        return servers
+
+    def get_server(self, identifier: str):
+        """:class:`Server`: The server with the id 'identifier'"""
+        response = self._parse_response(self._request('servers/%s' % identifier))
+        return Server(props=response, client=self)

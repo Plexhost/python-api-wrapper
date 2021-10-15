@@ -46,6 +46,9 @@ class PlexHostAPI(object):
         Args:
              response(dict): A request response object.
              detail(bool): Include additional data from the raw response.
+
+        Author:
+            iamkubi (github.com/iamkubi)
         """
         if detail:
             data = response
@@ -71,6 +74,9 @@ class PlexHostAPI(object):
         Returns:
             response: A HTTP response object or the JSON response depending on
                     the value of the json parameter.
+
+        Author:
+            iamkubi (github.com/iamkubi)
         """
         params = kwargs.pop("params", None)
         data = kwargs.pop("data", None)
@@ -78,7 +84,6 @@ class PlexHostAPI(object):
 
         url = BASE_URL + endpoint if endpoint is not None else ""
         headers = self._get_headers()
-
         if method == 'GET':
             response = self._session.get(url, params=params, headers=headers)
         elif method == 'POST':
